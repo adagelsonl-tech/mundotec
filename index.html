@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aventura pelo Mundo</title>
+<style>
+:root{--bg1:#5f3dc4;--bg2:#1c7ed6;--ink:#1a1240;--card:#fff;--fg:#1a1240;--muted:#5c5f7a;--yel:#ffd43b;--ok:#37b24d;--bad:#f03e3e;--pink:#ff6b9d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#3b2a8f;--bg2:#0b4f8a;--card:#f4f1ff}}
+:root[data-theme="dark"]{--bg1:#3b2a8f;--bg2:#0b4f8a;--card:#f4f1ff}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background:#3b2a8f;background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;color:#fff;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;font-weight:700}
+#app{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:34px;margin:6px 0;color:var(--yel);text-align:center;font-style:italic;text-transform:uppercase;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink);line-height:1}
+.sub{text-align:center;opacity:.9;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.pill{background:var(--ink);border-radius:99px;padding:6px 12px;font-size:14px;border:2px solid #ffffff55}
+.av{width:56px;height:56px;border-radius:16px;border:4px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 0 var(--ink);animation:fl 2s ease-in-out infinite}
+.av.s{width:44px;height:44px;font-size:24px;border-width:3px}
+@keyframes fl{50%{transform:translateY(-6px) rotate(-3deg)}}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.chars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.ch{aspect-ratio:1;border-radius:18px;border:4px solid var(--ink);font-size:44px;cursor:pointer;box-shadow:0 5px 0 var(--ink);transition:transform .15s}
+.ch.on{transform:scale(1.1) rotate(-4deg);outline:5px solid var(--yel)}
+input{width:100%;padding:14px;border-radius:14px;border:4px solid var(--ink);font:inherit;font-size:20px;text-align:center;color:var(--ink);background:#fff}
+.btn{display:block;width:100%;margin-top:14px;padding:15px;background:var(--yel);color:var(--ink);border:4px solid var(--ink);border-radius:16px;font:inherit;font-size:19px;font-weight:900;text-transform:uppercase;box-shadow:0 6px 0 var(--ink);cursor:pointer}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btn.alt{background:#fff}
+.node{display:flex;align-items:center;gap:12px;width:88%;margin:12px 0;padding:12px 14px;background:var(--card);color:var(--fg);border:4px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 var(--ink);font:inherit;text-align:left;cursor:pointer}
+.node:nth-child(even){margin-left:auto}
+.node .v{font-size:34px}.node small{display:block;color:var(--muted)}
+.node.cur{animation:pop .5s;outline:5px solid var(--yel)}
+.node.done{background:#d3f9d8}
+.node.lock{opacity:.55;cursor:not-allowed;filter:grayscale(.6)}
+.card{background:var(--card);color:var(--fg);border:4px solid var(--ink);border-radius:20px;padding:18px;box-shadow:0 6px 0 var(--ink);margin-top:12px;animation:pop .35s}
+.q{font-size:21px;margin:6px 0 12px}
+.opt{display:block;width:100%;margin:9px 0;padding:14px;border-radius:14px;border:3px solid var(--ink);background:#fff;color:var(--fg);font:inherit;text-align:left;cursor:pointer;box-shadow:0 4px 0 var(--ink)}
+.opt.ok{background:#b2f2bb}.opt.bad{background:#ffc9c9}
+.bar{height:14px;background:#ddd;border:3px solid var(--ink);border-radius:9px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:var(--pink);width:100%}
+.fact{margin-top:12px;padding:12px;border-radius:12px;background:#fff3bf;font-size:15px}
+.center{text-align:center}.big{font-size:72px;animation:fl 2s infinite}
+.stamp{display:inline-block;border:5px double #e8590c;color:#e8590c;border-radius:12px;padding:8px 18px;font-weight:900;transform:rotate(-6deg);margin:10px 0;animation:pop .6s}
+.sky{height:230px;border-radius:20px;border:4px solid var(--ink);background:linear-gradient(#74c0fc,#e7f5ff);position:relative;overflow:hidden;margin-top:14px}
+.sky .veh{position:absolute;top:70px;font-size:70px;animation:go 2.4s linear forwards}
+.sky .gr{position:absolute;bottom:0;left:0;right:0;height:50px;background:#69db7c;border-top:4px solid var(--ink)}
+@keyframes go{from{left:-90px}to{left:100%}}
+.av{overflow:hidden;padding:0}.av img,.ch img{width:100%;height:100%;object-fit:cover;display:block}.ch{aspect-ratio:3/4;padding:0;overflow:hidden}
+body{background:radial-gradient(2px 2px at 30px 40px,#fff9,transparent),radial-gradient(2px 2px at 140px 110px,#fff7,transparent),radial-gradient(1.5px 1.5px at 90px 170px,#fff8,transparent),linear-gradient(160deg,var(--bg1),var(--bg2));background-size:200px 200px,200px 200px,200px 200px,100% 100%;background-attachment:fixed}
+.hero{text-align:center;padding-top:8px}.hero h1{font-size:40px;background:linear-gradient(90deg,#ffd43b,#ff6b9d,#74c0fc);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:0;text-shadow:none;font-style:normal}
+.kick{font-size:12px;letter-spacing:3px;text-transform:uppercase;opacity:.85}
+.globe{width:180px;height:180px;border-radius:50%;margin:34px auto;position:relative;background:radial-gradient(circle at 30% 30%,#8ce99a,#2b8a3e 30%,#1971c2 32%,#1864ab 65%,#0b3d66);box-shadow:inset -22px -18px 40px #0009,0 0 70px #74c0fc99;animation:fl 4s ease-in-out infinite}
+.orb{position:absolute;inset:-32px;animation:spin 9s linear infinite}.o2{animation-delay:-3s}.o3{animation-delay:-6s}
+.orb span{position:absolute;top:0;left:50%;font-size:30px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.show{display:flex;justify-content:center;gap:6px;margin-bottom:6px}.show img{height:150px;animation:fl 3s ease-in-out infinite}.show img:nth-child(2){height:180px;animation-delay:-1s}.show img:nth-child(3){animation-delay:-2s}
+.prog{height:14px;background:#0004;border:3px solid var(--ink);border-radius:9px;overflow:hidden;margin:12px 0 6px}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--yel),var(--pink))}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}.st{background:#ffffff1f;border:2px solid #ffffff44;border-radius:16px;padding:12px 4px;text-align:center;font-size:13px}.st b{display:block;font-size:28px;color:var(--yel)}
+h2{font-size:20px;margin:26px 0 8px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cat{background:#ffffff1f;border:2px solid #ffffff44;border-radius:16px;padding:14px;font-size:13px;font-weight:600}.cat b{display:block;font-size:16px;margin:4px 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var CH=[
+{c:"#7048e8",skin:"#c5a3ff",hair:"#12b886",top:"#3b5bdb",bot:"#1a1240",w:.3,st:"spike",acc:"halo"},
+{c:"#0ca678",skin:"#63e6be",hair:"#ffd43b",top:"#862e9c",bot:"#1a1240",w:.3,st:"short",acc:"orbs"},
+{c:"#e64980",skin:"#ffc9c9",hair:"#4dabf7",top:"#f08c00",bot:"#212529",w:.24,st:"long",acc:"halo"},
+{c:"#f59f00",skin:"#ffe066",hair:"#ffffff",top:"#0b7285",bot:"#212529",w:.25,st:"long",acc:"orbs"},
+{c:"#1971c2",skin:"#74c0fc",hair:"#f783ac",top:"#e8590c",bot:"#1a1240",w:.3,st:"spike",acc:"crown"},
+{c:"#5f3dc4",skin:"#b2f2bb",hair:"#ff6b6b",top:"#212529",bot:"#3b5bdb",w:.24,st:"short",acc:"crown"}];
+var IM=[];
+function mk(o){
+  var g=new THREE.Group(),C=THREE.CylinderGeometry,Sp=THREE.SphereGeometry,B=THREE.BoxGeometry;
+  function add(geo,c,x,y,z,rx,rz,e){var m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:c,roughness:.35,metalness:e==2?.5:.15,emissive:e==1?c:0,emissiveIntensity:.9}));m.position.set(x,y,z);if(rx)m.rotation.x=rx;if(rz)m.rotation.z=rz;g.add(m);return m}
+  [-1,1].forEach(function(s){
+    add(new C(.12,.09,.95,14),o.bot,s*.13,.55,0,0,0,2);
+    add(new B(.17,.09,.32),"#1a1240",s*.13,.07,.05);
+    add(new C(.075,.06,.75,12),o.top,s*(o.w+.11),1.35,0,0,s*.12,2);
+    add(new Sp(.07,12,12),o.skin,s*(o.w+.17),.93,0);
+    add(new Sp(.04,8,8),o.hair,s*.08,2,.19,0,0,1);
+    add(new Sp(.09,12,12),o.hair,s*(o.w+.05),1.72,0,0,0,1);
+  });
+  add(new C(o.w,o.w*.8,.85,18),o.top,0,1.3,0,0,0,2);
+  add(new C(o.w*.83,o.w*.83,.06,18),o.hair,0,.9,0,0,0,1);
+  add(new C(.06,.07,.15,10),o.skin,0,1.78,0);
+  add(new Sp(.22,22,22),o.skin,0,1.97,0).scale.set(1,1.12,1);
+  add(new Sp(.235,22,22,0,Math.PI*2,0,Math.PI*.55),o.hair,0,1.99,-.01,-.25);
+  if(o.st=="long")add(new B(.4,.55,.16),o.hair,0,1.8,-.14);
+  if(o.st=="spike")for(var i=0;i<5;i++){var a=i*1.2566;add(new C(0,.06,.28,6),o.hair,Math.sin(a)*.12,2.22,Math.cos(a)*.12-.03)}
+  if(o.acc=="halo")add(new THREE.TorusGeometry(.27,.025,10,32),"#ffd43b",0,2.45,0,Math.PI/2,0,1);
+  if(o.acc=="orbs")[[-.55,1.9,.1,.08],[.5,2.3,0,.06],[.6,1.4,.2,.07]].forEach(function(p){add(new Sp(p[3],12,12),o.hair,p[0],p[1],p[2],0,0,1)});
+  if(o.acc=="crown")for(var j=0;j<5;j++){var b=j*1.2566;add(new C(0,.045,.17,6),"#ffd43b",Math.sin(b)*.17,2.24,Math.cos(b)*.17,0,0,1)}
+  return g;
+}
+function snaps(){
+  try{
+    var r=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true}),sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,.1,50);
+    sc.add(new THREE.AmbientLight(0xffffff,.8));
+    var dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(2,4,3);sc.add(dl);
+    CH.forEach(function(o){
+      var g=mk(o);g.rotation.y=-.5;sc.add(g);
+      r.setSize(240,330);cam.aspect=240/330;cam.position.set(0,1.15,6.3);cam.lookAt(0,1.1,0);cam.updateProjectionMatrix();r.render(sc,cam);var f=r.domElement.toDataURL();
+      r.setSize(160,160);cam.aspect=1;cam.position.set(0,1.85,2.1);cam.lookAt(0,1.75,0);cam.updateProjectionMatrix();r.render(sc,cam);var h=r.domElement.toDataURL();
+      sc.remove(g);IM.push([f,h]);
+    });
+    r.dispose();
+  }catch(e){IM=[]}
+}
+var P=[
+{t:"Cidades",p:"Torre Eiffel",n:"Paris, França",e:"🗼",v:"✈️",vn:"Voando",q:[
+["Em que país fica a Torre Eiffel?",["França","Itália","Bélgica","Espanha"],"Fica em Paris, capital da França."],
+["Para qual evento a torre foi construída?",["Exposição Universal de 1889","Olimpíadas","Copa do Mundo","Um casamento real"],"Era para ser temporária!"],
+["Qual o material principal da torre?",["Ferro","Concreto","Mármore","Vidro"],"São milhares de peças de ferro unidas por rebites."],
+["Qual rio passa por Paris?",["Rio Sena","Rio Tâmisa","Rio Reno","Rio Danúbio"],"O Sena corta o centro de Paris."],
+["Qual museu de Paris guarda a Mona Lisa?",["Louvre","Prado","Uffizi","British Museum"],"O Louvre é um dos museus mais visitados do mundo."],
+["Qual idioma se fala na França?",["Francês","Italiano","Espanhol","Alemão"],"O francês é o idioma oficial."]]},
+{t:"História",p:"Machu Picchu",n:"Cusco, Peru",e:"⛰️",v:"🚂",vn:"Viajando de trem",q:[
+["Qual civilização construiu Machu Picchu?",["Inca","Maia","Asteca","Olmeca"],"Os Incas a construíram no século XV."],
+["Em qual país fica?",["Peru","Bolívia","Chile","Equador"],"Fica no Peru, perto de Cusco."],
+["Em qual cordilheira ela está?",["Andes","Alpes","Himalaia","Montanhas Rochosas"],"Os Andes são a maior cordilheira da América do Sul."],
+["Qual animal é comum nos Andes?",["Lhama","Canguru","Urso-polar","Camelo"],"As lhamas são criadas nos Andes há milênios."],
+["Qual língua dos Incas ainda é falada nos Andes?",["Quéchua","Latim","Tupi","Maia"],"O quéchua é falado por milhões de pessoas."],
+["Machu Picchu significa, em quéchua:",["Montanha velha","Cidade dourada","Rio sagrado","Casa do Sol"],"O nome remete à montanha onde a cidade foi erguida."]]},
+{t:"História",p:"Coliseu",n:"Roma, Itália",e:"🏛️",v:"🚢",vn:"Navegando",q:[
+["Em qual cidade fica o Coliseu?",["Roma","Atenas","Paris","Madri"],"Roma foi a capital do Império Romano."],
+["O Coliseu era usado para:",["Lutas de gladiadores","Jogos de futebol","Feiras de peixe","Aulas de filosofia"],"Também havia espetáculos com animais."],
+["Qual império o construiu?",["Romano","Grego","Persa","Otomano"],"Foi inaugurado no ano 80 d.C."],
+["Como eram chamados os lutadores da arena?",["Gladiadores","Espartanos","Samurais","Cavaleiros"],"Muitos eram prisioneiros ou escravizados."],
+["Qual era o idioma dos antigos romanos?",["Latim","Grego","Hebraico","Árabe"],"Do latim nasceram o português, o italiano e o espanhol."],
+["Em qual país fica o Coliseu?",["Itália","Grécia","Turquia","Portugal"],"A Itália tem forma de bota."]]},
+{t:"História",p:"Pirâmides de Gizé",n:"Cairo, Egito",e:"🔺",v:"✈️",vn:"Voando",q:[
+["Em qual país ficam as Pirâmides de Gizé?",["Egito","México","Sudão","Jordânia"],"São as mais famosas do mundo."],
+["Qual rio corta o Egito?",["Nilo","Amazonas","Tigre","Danúbio"],"O Nilo foi essencial para os egípcios."],
+["As pirâmides eram túmulos de quem?",["Faraós","Soldados","Comerciantes","Escribas"],"Eram túmulos monumentais dos faraós."],
+["Qual é a maior pirâmide de Gizé?",["Quéops","Tutancâmon","Cleópatra","Nefertiti"],"A Grande Pirâmide é a de Quéops."],
+["Qual estátua com corpo de leão fica perto das pirâmides?",["Esfinge","Grifo","Minotauro","Dragão"],"A Grande Esfinge vigia Gizé."],
+["Qual é a capital do Egito?",["Cairo","Alexandria","Luxor","Assuã"],"Gizé fica na região metropolitana do Cairo."]]},
+{t:"História",p:"Muralha da China",n:"Pequim, China",e:"🐉",v:"🚂",vn:"Viajando de trem-bala",q:[
+["Por que a Muralha foi construída?",["Defesa contra invasões","Irrigar plantações","Decorar a cidade","Guardar tesouros"],"Ela protegia as fronteiras."],
+["Em qual continente fica a Muralha?",["Ásia","África","Europa","Oceania"],"A China fica na Ásia."],
+["Qual capital chinesa fica perto de trechos famosos da Muralha?",["Pequim","Xangai","Tóquio","Seul"],"Pequim é a capital da China."],
+["Qual idioma é mais falado na China?",["Mandarim","Japonês","Coreano","Tailandês"],"O mandarim é o idioma mais falado do país."],
+["Qual animal é símbolo da China?",["Panda-gigante","Canguru","Coala","Leão"],"Os pandas vivem nas montanhas chinesas."],
+["Qual bebida é tradicional na China?",["Chá","Café","Vinho","Guaraná"],"O chá é consumido lá há milhares de anos."]]},
+{t:"Cidades",p:"Cristo Redentor",n:"Rio de Janeiro, Brasil",e:"✝️",v:"🚢",vn:"Navegando",q:[
+["Em qual cidade fica o Cristo Redentor?",["Rio de Janeiro","São Paulo","Salvador","Brasília"],"Ele abre os braços sobre o Rio."],
+["Em qual morro ele está?",["Corcovado","Pão de Açúcar","Dois Irmãos","Tijuca"],"O Corcovado tem cerca de 700 metros."],
+["Em que ano foi eleito uma das Sete Maravilhas do Mundo Moderno?",["2007","1999","2015","1985"],"A eleição foi em 2007."],
+["Qual praia famosa fica no Rio de Janeiro?",["Copacabana","Jurerê","Porto de Galinhas","Boa Viagem"],"Copacabana é conhecida no mundo todo."],
+["Como são os braços do Cristo Redentor?",["Abertos","Cruzados","Para baixo","Para cima"],"Os braços abertos simbolizam acolhimento."],
+["Qual festa famosa acontece todo ano no Rio?",["Carnaval","Oktoberfest","Halloween","Festa junina"],"O Carnaval carioca atrai turistas do mundo todo."]]},
+{t:"Capitais",p:"Capitais da Europa",n:"Europa",e:"🏰",v:"🚂",vn:"Viajando de trem",q:[
+["Qual é a capital da Alemanha?",["Berlim","Munique","Frankfurt","Hamburgo"],"Berlim foi dividida por um muro até 1989."],
+["Qual é a capital de Portugal?",["Lisboa","Porto","Coimbra","Faro"],"Lisboa fica às margens do rio Tejo."],
+["Qual é a capital da Grécia?",["Atenas","Esparta","Tessalônica","Corinto"],"Atenas é uma das cidades mais antigas do mundo."],
+["Qual é a capital da Espanha?",["Madri","Barcelona","Sevilha","Valência"],"Barcelona é grande, mas a capital é Madri."],
+["Qual é a capital do Reino Unido?",["Londres","Manchester","Edimburgo","Liverpool"],"Londres é cortada pelo rio Tâmisa."],
+["Qual é a capital da Rússia?",["Moscou","São Petersburgo","Kiev","Minsk"],"Moscou abriga a Praça Vermelha."]]},
+{t:"Capitais",p:"Capitais das Américas",n:"Américas",e:"🗽",v:"✈️",vn:"Voando",q:[
+["Qual é a capital do Brasil?",["Brasília","Rio de Janeiro","São Paulo","Salvador"],"Brasília foi inaugurada em 1960."],
+["Qual é a capital da Argentina?",["Buenos Aires","Córdoba","Rosário","Mendoza"],"Buenos Aires fica às margens do Rio da Prata."],
+["Qual é a capital dos Estados Unidos?",["Washington, D.C.","Nova York","Los Angeles","Chicago"],"Nova York é a maior cidade, mas não a capital."],
+["Qual é a capital do Canadá?",["Ottawa","Toronto","Vancouver","Montreal"],"Muita gente pensa em Toronto, mas é Ottawa."],
+["Qual é a capital do México?",["Cidade do México","Guadalajara","Cancún","Monterrey"],"Foi construída sobre a antiga capital asteca."],
+["Qual é a capital do Chile?",["Santiago","Valparaíso","Concepción","Antofagasta"],"Santiago fica ao pé da Cordilheira dos Andes."]]},
+{t:"Continentes",p:"Continentes e Oceanos",n:"Planeta Terra",e:"🌐",v:"🚢",vn:"Navegando",q:[
+["Qual é o maior continente do mundo?",["Ásia","África","América","Europa"],"A Ásia concentra mais da metade da população mundial."],
+["Qual é o maior oceano?",["Pacífico","Atlântico","Índico","Ártico"],"O Pacífico cobre cerca de um terço da superfície da Terra."],
+["Em qual continente fica o Brasil?",["América do Sul","América do Norte","África","Europa"],"O Brasil ocupa quase metade da América do Sul."],
+["Em qual continente fica o deserto do Saara?",["África","Ásia","Oceania","América"],"O Saara é o maior deserto quente do planeta."],
+["Qual é o menor continente em área?",["Oceania","Europa","Antártida","América do Sul"],"A Oceania inclui Austrália e Nova Zelândia."],
+["Qual continente é coberto de gelo e não tem países?",["Antártida","Ártico","Groenlândia","Oceania"],"A Antártida é o continente mais frio da Terra."]]},
+{t:"História",p:"Grécia Antiga",n:"Atenas, Grécia",e:"🏺",v:"🚢",vn:"Navegando",q:[
+["Qual cidade grega é considerada o berço da democracia?",["Atenas","Esparta","Tebas","Corinto"],"Em Atenas nasceu a ideia de o povo participar das decisões."],
+["Onde surgiram os Jogos Olímpicos da Antiguidade?",["Olímpia","Roma","Troia","Cairo"],"Olímpia fica na Grécia e os jogos honravam Zeus."],
+["Quem era o rei dos deuses na mitologia grega?",["Zeus","Hades","Apolo","Poseidon"],"Zeus governava o Monte Olimpo."],
+["Qual filósofo foi mestre de Alexandre, o Grande?",["Aristóteles","Sócrates","Heráclito","Epicuro"],"Aristóteles foi aluno de Platão."],
+["Qual templo famoso fica na Acrópole de Atenas?",["Partenon","Panteão","Coliseu","Karnak"],"O Partenon foi dedicado à deusa Atena."],
+["Qual história grega fala de um cavalo de madeira?",["Guerra de Troia","Batalha de Maratona","Lenda de Hércules","Jogos Olímpicos"],"O cavalo de Troia foi o truque para invadir a cidade."]]},
+{t:"História",p:"História do Brasil",n:"Brasil",e:"🇧🇷",v:"🚢",vn:"Navegando",q:[
+["Quem chegou ao Brasil em 1500 com a frota portuguesa?",["Pedro Álvares Cabral","Cristóvão Colombo","Vasco da Gama","Américo Vespúcio"],"Cabral chegou onde hoje é a Bahia."],
+["Em que ano foi proclamada a independência do Brasil?",["1822","1500","1889","1922"],"O grito do Ipiranga foi em 7 de setembro de 1822."],
+["Quem proclamou a independência do Brasil?",["Dom Pedro I","Dom João VI","Tiradentes","Getúlio Vargas"],"Dom Pedro I virou o primeiro imperador."],
+["Qual lei aboliu a escravidão no Brasil em 1888?",["Lei Áurea","Lei do Ventre Livre","Lei dos Sexagenários","Lei Saraiva"],"A Lei Áurea foi assinada pela Princesa Isabel."],
+["Qual foi a primeira capital do Brasil?",["Salvador","Rio de Janeiro","Brasília","São Paulo"],"Salvador foi capital colonial até 1763."],
+["Em que ano o Brasil virou República?",["1889","1822","1930","1964"],"A República foi proclamada em 15 de novembro de 1889."]]},
+{t:"Cidades",p:"Cidades do Mundo",n:"Vários países",e:"🌆",v:"✈️",vn:"Voando",q:[
+["Em qual cidade fica a Estátua da Liberdade?",["Nova York","Los Angeles","Miami","Boston"],"Foi um presente da França aos Estados Unidos."],
+["Qual é a capital do Japão?",["Tóquio","Quioto","Osaka","Hiroshima"],"Tóquio é uma das maiores cidades do mundo."],
+["A Ópera de Sydney fica em qual país?",["Austrália","Nova Zelândia","Canadá","África do Sul"],"Sydney é a cidade mais populosa da Austrália."],
+["Qual cidade tem o Burj Khalifa, um dos prédios mais altos do mundo?",["Dubai","Abu Dhabi","Doha","Riade"],"Dubai fica nos Emirados Árabes Unidos."],
+["Qual cidade italiana é famosa pelos canais?",["Veneza","Milão","Turim","Nápoles"],"Veneza foi construída sobre uma lagoa."],
+["Istambul fica entre quais continentes?",["Europa e Ásia","África e Ásia","Europa e África","Ásia e Oceania"],"O estreito do Bósforo divide a cidade em duas partes."]]},
+{t:"História",p:"Taj Mahal",n:"Agra, Índia",e:"🕌",v:"✈️",vn:"Voando",q:[
+["Em qual país fica o Taj Mahal?",["Índia","Paquistão","Nepal","Bangladesh"],"Fica na cidade de Agra, no norte da Índia."],
+["Para homenagear quem o imperador Shah Jahan mandou construí-lo?",["Sua esposa, Mumtaz Mahal","Sua mãe","Seu filho","Um deus"],"Ele é um mausoléu feito por amor."],
+["Qual é o material principal do Taj Mahal?",["Mármore branco","Granito","Madeira","Tijolo vermelho"],"O mármore muda de cor conforme a luz do dia."],
+["Qual rio corre ao lado do Taj Mahal?",["Yamuna","Indo","Mekong","Yangtzé"],"O Yamuna é um afluente do Ganges."],
+["Qual é a capital da Índia?",["Nova Délhi","Mumbai","Calcutá","Bangalore"],"Nova Délhi fica ao lado da antiga Délhi."],
+["Qual é uma das línguas oficiais da Índia?",["Hindi","Mandarim","Árabe","Persa"],"A Índia tem centenas de idiomas."]]},
+{t:"Capitais",p:"Capitais da Ásia e Oceania",n:"Ásia e Oceania",e:"📍",v:"✈️",vn:"Voando",q:[
+["Qual é a capital da Tailândia?",["Bangkok","Phuket","Chiang Mai","Hanói"],"Bangkok é famosa pelos templos e mercados flutuantes."],
+["Qual é a capital da Coreia do Sul?",["Seul","Busan","Pyongyang","Tóquio"],"Seul é uma das maiores metrópoles da Ásia."],
+["Qual é a capital da Austrália?",["Camberra","Sydney","Melbourne","Perth"],"Sydney é maior, mas a capital é Camberra."],
+["Qual é a capital da Nova Zelândia?",["Wellington","Auckland","Christchurch","Queenstown"],"Wellington fica na ponta da Ilha Norte."],
+["Qual é a capital do Japão?",["Tóquio","Quioto","Osaka","Nagoia"],"Quioto foi capital imperial no passado."],
+["Qual é a capital da Índia?",["Nova Délhi","Mumbai","Chennai","Jaipur"],"Mumbai é a maior cidade financeira."]]},
+{t:"Continentes",p:"Safári na África",n:"África",e:"🦁",v:"✈️",vn:"Voando",q:[
+["Qual é o maior deserto quente do mundo?",["Saara","Gobi","Kalahari","Atacama"],"O Saara cobre boa parte do norte da África."],
+["Em qual país fica o Monte Kilimanjaro?",["Tanzânia","Egito","África do Sul","Nigéria"],"É a montanha mais alta da África."],
+["Qual país africano tem o português como língua oficial?",["Angola","Quênia","Gana","Etiópia"],"Moçambique também fala português."],
+["Qual é o maior animal terrestre do mundo?",["Elefante-africano","Girafa","Hipopótamo","Rinoceronte"],"A girafa é a mais alta, mas o elefante é o maior."],
+["Quais cataratas ficam entre Zâmbia e Zimbábue?",["Cataratas Vitória","Cataratas do Iguaçu","Cataratas do Niágara","Salto Ángel"],"São chamadas de 'a fumaça que troveja'."],
+["Qual país africano foi o de Nelson Mandela?",["África do Sul","Quênia","Egito","Marrocos"],"Mandela liderou a luta contra o apartheid."]]},
+{t:"Continentes",p:"Oceania Selvagem",n:"Austrália e Nova Zelândia",e:"🦘",v:"🚢",vn:"Navegando",q:[
+["Qual animal é símbolo da Austrália?",["Canguru","Panda","Lhama","Leão"],"Cangurus só existem naturalmente na Austrália e regiões próximas."],
+["Qual é a maior estrutura de corais do mundo?",["Grande Barreira de Corais","Recife de Belize","Mar Vermelho","Atol de Maldivas"],"Fica na costa nordeste da Austrália."],
+["Como se chama o povo indígena da Nova Zelândia?",["Maori","Aborígene","Inuit","Sami"],"A cultura maori é forte na Nova Zelândia."],
+["Como são chamados os povos originários da Austrália?",["Aborígenes","Maoris","Incas","Vikings"],"Estão na Austrália há dezenas de milhares de anos."],
+["Qual ave é símbolo da Nova Zelândia?",["Kiwi","Águia","Pinguim","Papagaio"],"O kiwi não voa."],
+["Qual é o maior país da Oceania em área?",["Austrália","Nova Zelândia","Papua-Nova Guiné","Fiji"],"A Austrália ocupa quase todo o continente."]]}
+];
+var S={name:"",ch:0,done:0,score:0},cur,tm,left,sel=0;
+try{var s=JSON.parse(localStorage.getItem("gm2")||"null");if(s)S=s}catch(e){}
+function save(){try{localStorage.setItem("gm2",JSON.stringify(S))}catch(e){}}
+var A=document.getElementById("app");
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function av(c,sm){return '<div class="av '+(sm?"s":"")+'" style="background:'+CH[c].c+'">'+(IM[c]?'<img alt="" src="'+IM[c][1]+'">':"🙂")+'</div>'}
+function home(){
+  var nq=P.length*6,pc=Math.round(S.done/P.length*100);
+  var sh=IM.length?'<div class="show">'+[0,2,4].map(function(i){return '<img alt="" src="'+IM[i][0]+'">'}).join('')+'</div>':'';
+  A.innerHTML='<div class="hero"><div class="kick">Quiz de geografia e história</div><h1>Aventura pelo Mundo</h1><p class="sub">Viaje de avião, trem e navio, conquiste destinos e aprenda a cada resposta.</p><div class="globe"><div class="orb"><span>✈️</span></div><div class="orb o2"><span>🚂</span></div><div class="orb o3"><span>🚢</span></div></div>'+sh+
+  '<button class="btn" onclick="S.name?map():setup()">'+(S.name?"Continuar, "+S.name:"Jogar agora")+'</button>'+(S.name?'<div class="prog"><i style="width:'+pc+'%"></i></div><div class="sub" style="font-size:13px">'+S.done+' de '+P.length+' destinos conquistados</div>':'')+'</div>'+
+  '<div class="stats"><div class="st"><b>'+P.length+'</b>destinos</div><div class="st"><b>'+nq+'</b>perguntas</div><div class="st"><b>4</b>categorias</div></div>'+
+  '<h2>O que você vai aprender</h2><div class="cats"><div class="cat">🏛️<b>História</b>Civilizações, impérios e fatos marcantes</div><div class="cat">🏙️<b>Cidades</b>Monumentos e lugares famosos</div><div class="cat">📍<b>Capitais</b>Europa, Américas, Ásia e Oceania</div><div class="cat">🌐<b>Continentes</b>Oceanos, continentes e o planeta</div></div>'+
+  '<h2>Como funciona</h2><div class="cats" style="grid-template-columns:1fr"><div class="cat">1️⃣<b>Crie seu avatar</b>Escolha um viajante surreal e digite seu nome</div><div class="cat">2️⃣<b>Viaje</b>Cada fase começa com uma viagem de avião, trem ou navio</div><div class="cat">3️⃣<b>Acerte 3 de 5</b>As perguntas são sorteadas. Cada resposta traz uma curiosidade</div></div>';
+}
+function setup(){
+  sel=S.ch;
+  var h='<h1>Crie seu avatar</h1><div class="sub">Escolha seu viajante surreal e parta em viagem!</div><div class="chars">';
+  CH.forEach(function(c,i){h+='<button class="ch'+(i==sel?" on":"")+'" style="background:'+c.c+'" onclick="pick('+i+')">'+(IM[i]?'<img alt="" src="'+IM[i][0]+'">':"🙂")+'</button>'});
+  A.innerHTML=h+'</div><input id="nm" maxlength="12" placeholder="Seu nome" value="'+S.name+'"><button class="btn" onclick="begin()">Começar aventura</button>';
+}
+function pick(i){sel=i;document.querySelectorAll(".ch").forEach(function(b,k){b.classList.toggle("on",k==i)})}
+function begin(){S.name=(document.getElementById("nm").value.trim()||"Viajante").replace(/[<>&"]/g,"");S.ch=sel;save();map()}
+function map(){
+  var h='<div class="top">'+av(S.ch,1)+'<span class="pill">'+S.name+'</span><span class="pill">⭐ '+S.score+'</span><span class="pill">🛂 '+S.done+'/'+P.length+'</span></div><h1>Mapa da Viagem</h1><div class="prog"><i style="width:'+Math.round(S.done/P.length*100)+'%"></i></div>';
+  P.forEach(function(p,i){
+    var c=i<S.done?"done":i==S.done?"cur":"lock";
+    h+='<button class="node '+c+'" onclick="go('+i+')"><span class="v">'+(i<=S.done?p.v:"🔒")+'</span><span><b>'+p.p+'</b><small>'+(i<S.done?"Conquistado ✓ · ":"")+p.t+" · "+p.n+'</small></span></button>';
+  });
+  if(S.done>=P.length)h+='<div class="card center"><div class="big">🏆</div><b>'+S.name+' conquistou o mundo!</b><button class="btn" onclick="reset()">Jogar de novo</button></div>';
+  A.innerHTML=h+'<button class="btn alt" onclick="setup()">Trocar avatar</button><button class="btn alt" onclick="home()">‹ Página inicial</button>';
+}
+function reset(){S.done=0;S.score=0;save();map()}
+function go(i){
+  if(i>S.done)return;
+  var p=P[i];
+  A.innerHTML='<h1>'+p.vn+'…</h1><div class="sub">Rumo a '+p.n+'</div><div class="sky"><div class="veh">'+p.v+'</div><div class="gr"></div></div><div class="center" style="margin-top:14px">'+(IM[S.ch]?'<img alt="" src="'+IM[S.ch][0]+'" style="height:160px;animation:fl 2s ease-in-out infinite">':av(S.ch))+'</div>';
+  setTimeout(function(){start(i)},2500);
+}
+function start(i){cur={i:i,qs:shuf(P[i].q).slice(0,5),n:0,ok:0,streak:0,gain:0};ask()}
+function hud(){return '<div class="top">'+av(S.ch,1)+'<span class="pill">'+P[cur.i].e+' '+P[cur.i].p+'</span><span class="pill">✅ '+cur.ok+'/3</span><span class="pill">🔥 '+cur.streak+'</span></div>'}
+function ask(){
+  var it=cur.qs[cur.n];
+  cur.o=shuf(it[1].map(function(t,k){return [t,k==0]}));
+  left=15;
+  var h=hud()+'<div class="card"><small>Pergunta '+(cur.n+1)+' de 5 · acerte 3 para avançar</small><div class="q">'+it[0]+'</div>';
+  cur.o.forEach(function(o,k){h+='<button class="opt" onclick="ans('+k+')">'+o[0]+'</button>'});
+  A.innerHTML=h+'<div class="bar"><i id="tb"></i></div><div id="fx"></div></div>';
+  clearInterval(tm);
+  tm=setInterval(function(){left-=0.1;var b=document.getElementById("tb");if(b)b.style.width=(left/15*100)+"%";if(left<=0)ans(-1)},100);
+}
+function ans(k){
+  clearInterval(tm);
+  var ok=k>=0&&cur.o[k][1];
+  document.querySelectorAll(".opt").forEach(function(b,j){b.disabled=true;if(cur.o[j][1])b.classList.add("ok");else if(j==k)b.classList.add("bad")});
+  if(ok){cur.ok++;cur.gain+=100+Math.ceil(Math.max(left,0)*4)+cur.streak*20;cur.streak++}else cur.streak=0;
+  document.getElementById("fx").innerHTML='<div class="fact">'+(ok?"✅ Mandou bem!":k<0?"⏱️ Tempo esgotado!":"❌ Errou!")+'<br>💡 '+cur.qs[cur.n][2]+'</div><button class="btn" onclick="nxt()">Continuar</button>';
+}
+function nxt(){
+  if(cur.n<4){cur.n++;return ask()}
+  var win=cur.ok>=3;
+  if(win&&cur.i==S.done){S.done++;S.score+=cur.gain;save()}
+  A.innerHTML=hud()+'<div class="card center">'+(win?'<div class="big">'+P[cur.i].e+'</div><div class="stamp">'+P[cur.i].p.toUpperCase()+'<br>CONQUISTADO</div><p>Você acertou '+cur.ok+' de 5!<br>+'+cur.gain+' pontos</p><button class="btn" onclick="map()">Próxima viagem</button>':'<div class="big">💥</div><p>Você acertou '+cur.ok+' de 5. Precisa de 3 para avançar.</p><button class="btn" onclick="go('+cur.i+')">Tentar de novo</button><button class="btn alt" onclick="map()">Voltar ao mapa</button>')+'</div>';
+}
+snaps();home();
+</script>
+</body>
+</html>
